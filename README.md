@@ -1,0 +1,1 @@
+# browserify-plugin-can-compile

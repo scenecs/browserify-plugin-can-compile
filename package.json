@@ -1,0 +1,15 @@
+{
+  "name": "browserify-plugin-can-compile",
+  "version": "1.0.0",
+  "description": "Compile CanJs Templates into an extra file.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "SCENECS <scenecs@t-online.de>",
+  "license": "ISC",
+  "dependencies": {
+    "through2": "~2.0.0",
+    "can-compile": "~0.10.0"
+  }
+}
