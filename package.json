@@ -16,7 +16,9 @@
   "bugs": {
     "url": "https://github.com/scenecs/browserify-plugin-can-compile/issues"
   },
-  
+  "engines": {
+    "node" : ">=1.0"
+  },
   "keywords": [
     "browserify",
     "plugin",
