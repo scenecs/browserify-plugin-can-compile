@@ -14,7 +14,9 @@
     "compiler"
   ],
   "homepage": "https://github.com/scenecs/browserify-plugin-can-compile",
-  "moduleType": [],
+  "moduleType": [
+    "node"
+  ],
   "private": true,
   "ignore": [
     "**/.*",
