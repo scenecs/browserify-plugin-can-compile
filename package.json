@@ -13,6 +13,10 @@
     "type": "git",
     "url": "https://github.com/scenecs/browserify-plugin-can-compile"
   },
+  "scripts": {
+    "postinstall": "bower install",
+    "postupdate": "bower update"
+  },
   "bugs": {
     "url": "https://github.com/scenecs/browserify-plugin-can-compile/issues"
   },
@@ -27,7 +31,9 @@
     "compiler"
   ],
   "dependencies": {
+    "extend": "~3.0.0",
     "through2": "~2.0.0",
-    "can-compile": "~0.10.0"
+    "can-compile": "~0.10.0",
+    "bower": "~1.6.8"
   }
 }
