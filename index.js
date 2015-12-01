@@ -11,6 +11,7 @@ var extend = require("extend"),
     canCompiler = require("can-compile"),
     fs = require("fs"),
     path = require("path"),
+    mkdirp = require("mkdirp"),
 
 
     /**
@@ -149,10 +150,13 @@ module.exports = function canCompile(bundle, options){
       var _options = this.bpccOptions;
 
       if(!isNone(_options.filename)) {
-        var bpccBuffer = this.bpccBuffer;
+        var bpccBuffer = this.bpccBuffer,
+            file = path.normalize(_options.filename),
+            filePath = path.dirname(file);
 
         if(Array.isArray(bpccBuffer)) {
-          var writeStream = fs.createWriteStream(path.normalize(_options.filename), { "flags": "w", "defaultEncoding": "utf8" });
+          mkdirp.sync(filePath);
+          var writeStream = fs.createWriteStream(file, { "flags": "w+", "defaultEncoding": "utf8" });
           
           bpccBuffer.forEach(function(item, index){
             writeStream.write(item);
