@@ -152,7 +152,7 @@ module.exports = function canCompile(bundle, options){
         var bpccBuffer = this.bpccBuffer;
 
         if(Array.isArray(bpccBuffer)) {
-          var writeStream = fs.createWriteStream(path.normalize(_options.dest), { "flags": "w", "defaultEncoding": "utf8" });
+          var writeStream = fs.createWriteStream(path.normalize(_options.filename), { "flags": "w", "defaultEncoding": "utf8" });
           
           bpccBuffer.forEach(function(item, index){
             writeStream.write(item);
