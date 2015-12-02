@@ -1,6 +1,6 @@
 {
   "name": "browserify-plugin-can-compile",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "This Browserify plugin compiles CanJs Templates into an extra Javascript file.",
   "main": "index.js",
   "scripts": {
