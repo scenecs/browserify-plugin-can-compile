@@ -1,7 +1,7 @@
 /**
  * @package browserify-plugin-can-compile
  * @category javascript
- * @author scenecs
+ * @author scenecs <scenecs@t-online.de>
  */
 
 'use strict';
@@ -15,13 +15,12 @@ var extend = require("extend"),
 
 
     /**
-     * can-compile needs jQuery and canJs to compile the templates. By default, it loads all files down.
-     * Thus always an Internet connection necessary.
-     *
+     * can-compile needs jQuery and canJs to compile the templates. By default, it loads all files
+     * from the internet. Thus always an Internet connection necessary.
      *
      * The attribute "isVendorScriptsInstalled" is true, if the needed vendors are installed.
      *
-     * This browserify plugin expects the following file structure:
+     * This browserify plugin expects the following file structure for the vendors:
      *    - vendor/jquery
      *    - vendor/canjs
      *
@@ -31,14 +30,39 @@ var extend = require("extend"),
      */
     isVendorScriptsInstalled = false,
     
+    /**
+     * Returns true if the passed value is null or undefined.
+     *
+     * ```javascript
+     * isNone();              // true
+     * isNone(null);          // true
+     * isNone(undefined);     // true
+     * isNone('');            // false
+     * isNone([]);            // false
+     * isNone(function() {});  // false
+     * ```
+     * @method isNone
+     * @private
+     * @param {mixed} obj Value to test
+     * @return {Boolean}
+     */
     isNone = function isNone(obj) {
       return obj === null || obj === undefined;
     },
 
+    /**
+     * Creates a Regular Expressions for the defined template extensions.
+     *
+     * @method createFileExtensionRegExp
+     * @private
+     * @param {String|Array} fileExtensions Extensions as string list or array list
+     * @return {RegExp} Returns the generated Regular Expressions with capturing parentheses for
+     *    filename and file extension
+     */
     createFileExtensionRegExp = function createFileExtensionRegExp(fileExtensions){
       var _fileExtensions = [],
           _flags = "ig";
-      
+
       if(Array.isArray(fileExtensions)) {
         _fileExtensions = fileExtensions;
       }
@@ -53,8 +77,22 @@ var extend = require("extend"),
 
       return new RegExp("^.*\\" + path.sep + "([\\w-]+)\\.(" + (_fileExtensions.join("|") || "[\\w]+") + ")$", _flags);
     },
-    
-    
+
+    /**
+     * The normalizer returns a normalized key for the parsed template. With this key is it possible
+     *    to call the template in the application. By default, the key is the filename of the template.
+     *
+     * The normalizer can be overwritten via plugin configuration. For more information please see
+     *    at can-compile dokumentation: https://github.com/canjs/can-compile
+     *
+     * @method canCompileDefaultNormalizer
+     * @private
+     * @param {RegExp} fileExtensions Regular Expressions with capturing parentheses for
+     *    filename and file extension
+     * @return {String} Returns the key for the rendered can template.
+     *
+     * @see https://github.com/canjs/can-compile#programmatically
+     */
     canCompileDefaultNormalizer = function(fileExtensions){
       var _fileExtensions = fileExtensions;
 
@@ -82,9 +120,78 @@ try {
   isVendorScriptsInstalled = false;
 }
 
-
+/**
+ * Browserify Plugin: browserify-plugin-can-compile
+ * =================================================
+ *
+ * A [Browserify](https://github.com/substack/node-browserify) plugin to require canJs template
+ * files in a javascript file. The template will be precompiled with module "can-compile" and will
+ * be bundled with the other javascript code. It is possible to save all required templates in an
+ * external javascript file.
+ *
+ * b.plugin(canCompile [, options])
+ * ---------------------------------
+ *
+ * ### options
+ *
+ * The options object allows the following configuration options:
+ *
+ *    - `filename` {String}: The name of the file to be compiled
+ *    - `version` {String}: The CanJS version to be used
+ *    - `log` {Function}: A logger function (e..g `console.log.bind(console)`)
+ *    - `normalizer` {Function}: A Function that returns the normalized path name
+ *    - `tags` {Array}: A list of all your can.Component tags. They need to be registered in order to pre-compile views properly.
+ *    - `extensions` {Object}: An object to map custom file extensions to the standard extension (e.g. `{ 'mst' : 'mustache' }`)
+ *    - `viewAttributes` {Array}: A list of attribute names (RegExp or String), used for additional behavior for an attribute in a view (can.view.attr)
+ *    - `paths` an object with `ejs`, `mustache` or `stache` and a `jquery` property pointing to files of existing versions or CanJS and jQuery instead of the CDN links.
+ *
+ * All options are optional. If the option `filename` is defined, the precompiled templates will be
+ * saved in this external file.
+ *
+ * For more information please see at can-compile dokumentation: https://github.com/canjs/can-compile
+ *
+ * Example
+ * --------
+ * 
+ * ```javascript
+ *  var browserify = require('browserify'),
+ *      canCompile = require('browserify-plugin-can-compile');
+ *
+ *  var b = browserify();
+ *
+ *  b.add('./app.js')
+ *   .plugin(canCompile, {
+ *      "filename": "./views-app.js"
+ *    })
+ *   .bundle().pipe(process.stdout);
+ * ```
+ *
+ * @class canCompile
+ * @constructor
+ * @param {Browserify} bundle Browserify instance
+ * @see https://github.com/substack/node-browserify#browserifyfiles--opts
+ * @param {Object} options Can-compile options to influence the compile process. This options will
+ *    be piped to the module "can-compile".
+ * @see https://github.com/canjs/can-compile#programmatically
+ */
 module.exports = function canCompile(bundle, options){
-  
+
+  /**
+   * @property _options
+   * @private
+   * @type Object
+   * @default {
+   *     "extensions": {
+   *       "stache": "stache",
+   *       "ejs": "ejs",
+   *       "mustache": "mustache"
+   *     },
+   *     "paths": undefined,
+   *     "filename": undefined,
+   *     "version": "2.3.2",
+   *     "normalizer": canCompileDefaultNormalizer()
+   *   }
+   */
   var _options = {
         "extensions": {
           "stache": "stache",
@@ -97,6 +204,7 @@ module.exports = function canCompile(bundle, options){
         "normalizer": canCompileDefaultNormalizer()
       };
 
+  // check if vendors are installed
   if(true === isVendorScriptsInstalled) {
     _options.paths = {
       'jquery': path.resolve(__dirname + "/vendor/jquery/dist/jquery.js"),
@@ -107,6 +215,8 @@ module.exports = function canCompile(bundle, options){
     };
   }
 
+  // Browserify has an internal labeled-stream-splicer pipeline.
+  // The Stream will be extended the state "deps".
   bundle.pipeline.get("deps").splice(1, 0, through2.obj(function(row, enc, next) {
       _options = extend(true, {}, _options, options);
     
@@ -132,11 +242,12 @@ module.exports = function canCompile(bundle, options){
 
           if(isNone(_options.filename)){
             row["source"] = bufferedResult;
-            _this.push(row);
           } else {
             _this.bpccBuffer.push(bufferedResult);
+            row["source"] = "module.export = true";
           }
           
+          _this.push(row);
           next();
         });
         return;
