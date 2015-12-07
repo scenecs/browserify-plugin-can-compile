@@ -201,7 +201,9 @@ module.exports = function canCompile(bundle, options){
         "paths": undefined,
         "filename": undefined,
         "version": "2.3.2",
-        "normalizer": canCompileDefaultNormalizer()
+        "normalizer": canCompileDefaultNormalizer(),
+        "wrapper": 'module.exports = {{{content}}}',
+        "wrapperForExternalTemplateFile": undefined
       };
 
   // check if vendors are installed
@@ -231,7 +233,10 @@ module.exports = function canCompile(bundle, options){
         if("undefined" == typeof this.bpccBuffer) {
           this.bpccBuffer = [];
         }
-        
+        if(!isNone(_options.filename)) {
+          _options.wrapper = _options.wrapperForExternalTemplateFile;
+        }
+
         canCompiler(file, _options, function (err, result){
 
           if(err) {
@@ -244,7 +249,7 @@ module.exports = function canCompile(bundle, options){
             row["source"] = bufferedResult;
           } else {
             _this.bpccBuffer.push(bufferedResult);
-            row["source"] = "module.export = true";
+            row["source"] = "module.export = can.view('" + _option.normalizer(file) + "')";
           }
           
           _this.push(row);
