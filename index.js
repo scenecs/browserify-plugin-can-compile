@@ -249,7 +249,7 @@ module.exports = function canCompile(bundle, options){
             row["source"] = bufferedResult;
           } else {
             _this.bpccBuffer.push(bufferedResult);
-            row["source"] = "module.export = can.view('" + _option.normalizer(file) + "')";
+            row["source"] = "module.export = can.view('" + _options.normalizer(file) + "')";
           }
           
           _this.push(row);
@@ -272,7 +272,7 @@ module.exports = function canCompile(bundle, options){
 
         if(Array.isArray(bpccBuffer)) {
           mkdirp.sync(filePath);
-          var writeStream = fs.createWriteStream(file, { "flags": "w+", "defaultEncoding": "utf8" });
+          var writeStream = fs.createWriteStream(file, { "flags": "w", "defaultEncoding": "utf8" });
           
           bpccBuffer.forEach(function(item, index){
             writeStream.write(item);
