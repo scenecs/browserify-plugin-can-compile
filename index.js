@@ -202,7 +202,7 @@ module.exports = function canCompile(bundle, options){
         "filename": undefined,
         "version": "2.3.2",
         "normalizer": canCompileDefaultNormalizer(),
-        "wrapper": 'module.exports = {{{content}}}',
+        "wrapper": 'module.exports = {{{content}}};',
         "wrapperForExternalTemplateFile": undefined
       };
 
@@ -249,7 +249,7 @@ module.exports = function canCompile(bundle, options){
             row["source"] = bufferedResult;
           } else {
             _this.bpccBuffer.push(bufferedResult);
-            row["source"] = "module.export = can.view('" + _options.normalizer(file) + "')";
+            row["source"] = "module.export = can.view('" + _options.normalizer(file) + "');";
           }
           
           _this.push(row);
