@@ -21,7 +21,7 @@
     "url": "https://github.com/scenecs/browserify-plugin-can-compile/issues"
   },
   "engines": {
-    "node" : ">=1.0"
+    "node" : ">=4.3"
   },
   "keywords": [
     "browserify",
@@ -33,8 +33,8 @@
   "dependencies": {
     "mkdirp": "~0.5.1",
     "extend": "~3.0.0",
-    "through2": "~2.0.0",
+    "through2": "~2.0.1",
     "can-compile": "~0.10.0",
-    "bower": "~1.6.8"
+    "bower": "~1.7.7"
   }
 }
