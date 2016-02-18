@@ -209,11 +209,11 @@ module.exports = function canCompile(bundle, options){
   // check if vendors are installed
   if(true === isVendorScriptsInstalled) {
     _options.paths = {
-      'jquery': path.resolve(__dirname + "/vendor/jquery/dist/jquery.js"),
-      'can': path.resolve(__dirname + "/vendor/canjs/can.jquery.js"),
-      'ejs': path.resolve(__dirname + "/vendor/canjs/can.ejs.js"),
-      'mustache': path.resolve(__dirname + "/vendor/canjs/can.view.mustache.js"),
-      'stache': path.resolve(__dirname + "/vendor/canjs/can.stache.js")
+      'jquery': path.resolve(__dirname + "/vendor/jquery/jquery.js"),
+      'can': path.resolve(__dirname + "/vendor/can/can.js"),
+      'ejs': path.resolve(__dirname + "/vendor/can/can.ejs.js"),
+      'mustache': path.resolve(__dirname + "/vendor/can/can.view.mustache.js"),
+      'stache': path.resolve(__dirname + "/vendor/can/can.stache.js")
     };
   }
 

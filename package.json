@@ -1,6 +1,6 @@
 {
   "name": "browserify-plugin-can-compile",
-  "version": "1.0.3",
+  "version": "1.0.8",
   "description": "This Browserify plugin compiles CanJs Templates into an extra Javascript file.",
   "main": "index.js",
   "scripts": {
@@ -12,10 +12,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/scenecs/browserify-plugin-can-compile"
-  },
-  "scripts": {
-    "postinstall": "bower install",
-    "postupdate": "bower update"
   },
   "bugs": {
     "url": "https://github.com/scenecs/browserify-plugin-can-compile/issues"
@@ -31,10 +27,11 @@
     "compiler"
   ],
   "dependencies": {
+    "jquery": "2.2.0",
+    "can": "~2.3.16",
     "mkdirp": "~0.5.1",
     "extend": "~3.0.0",
     "through2": "~2.0.1",
-    "can-compile": "~0.10.0",
-    "bower": "~1.7.7"
+    "can-compile": "~0.10.0"
   }
 }
