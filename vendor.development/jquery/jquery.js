@@ -6,4 +6,4 @@
 
 'use strict';
 
-require("jquery/jquery.min");
+require("jquery/dist/jquery.min");
