@@ -41,8 +41,6 @@ gulp.task("compileVendor", function(callback){
         splittedPath.splice(0, 2);
         newPath = splittedPath.join(path.sep);
         
-        console.log("newPath: ", item, newPath);
-        
         fakeSources.push({
           "path": newPath,
           "contents": buf
