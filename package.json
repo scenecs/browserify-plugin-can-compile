@@ -34,7 +34,7 @@
     "prepublish": "npm run compile",
     "clean": "node -e \"require('del').sync(['./**/*', '!.*', '!./src', '!./src/**/*', '!./test', '!./test/**/*', '!./node_modules', '!./node_modules/**/*', '!./package.json', '!./canjsBinaryCache', '!./canjsBinaryCache/**/*', '!./*.md']);\"",
     "test": "$(npm bin)/istanbul cover $(npm bin)/_mocha -- -c --recursive --require babel-core/register",
-    "test-watch": "$(npm bin)/mocha --require babel-core/register -w -c ./test/*.spec* ./test/**/*.spec*"
+    "test-watch": "$(npm bin)/mocha --require babel-core/register -w -c --recursive"
   },
   "bin": {
     "getCanCompileVendorLibraries": "./bin/getCanCompileVendorLibraries"
