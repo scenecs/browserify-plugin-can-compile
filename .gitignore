@@ -1,3 +1,7 @@
-node_modules
-vendor
-/coverage
+/**/*
+!/*.json
+!/.*
+!/*.md
+!/src
+!/test
+.DS*

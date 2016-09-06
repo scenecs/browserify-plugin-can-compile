@@ -157,7 +157,7 @@ export default class BrowserifyPluginCanCompile {
       /* istanbul ignore next */
       canCompileScriptsCache.on("ready", (instance) => {
         this.setPaths(instance.getPaths());
-        this.promise = Promise.resolve();
+        this.promise = Promise.resolve(instance);
       });
       
       /* istanbul ignore next */
@@ -352,39 +352,44 @@ export default class BrowserifyPluginCanCompile {
   /* istanbul ignore next */
   static transformFunction(chunk, encoding, callback) {
     let currentInstance = BrowserifyPluginCanCompile.getInstance();
-    let options = currentInstance.getOptions();
-    let file = chunk["id"];
-    let fileExtRegEx = currentInstance.getFileExtensionRegExp();
-    let currentWrapper = options.wrapper;
+    
+    currentInstance.promise.then((instance) => {
+      let options = instance.getOptions();
+      let file = chunk["id"];
+      let fileExtRegEx = instance.getFileExtensionRegExp();
+      let currentWrapper = options.wrapper;
+    
+      if(fileExtRegEx.test(file)) {
+    
+        if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
+          currentWrapper = options.wrapperForExternalTemplateFile;
+        }
   
-    if(fileExtRegEx.test(file)) {
-  
-      if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
-        currentWrapper = options.wrapperForExternalTemplateFile;
+        canCompiler(file, options, (err, result) => {
+          if(err) {
+            return callback(err);
+          }
+    
+          let bufferedResult = new Buffer(result);
+    
+          if(BrowserifyPluginCanCompile.isNone(options.filename)){
+            chunk["source"] = bufferedResult;
+          } else {
+            Array.prototype.push.call(instance.buffer, bufferedResult);
+            chunk["source"] = "module.export = can.view('" + options.normalizer(file) + "');";
+          }
+          
+          this.push(chunk);
+          callback();
+        });
+        return;
       }
-
-      canCompiler(file, options, (err, result) => {
-        if(err) {
-          return callback(err);
-        }
   
-        let bufferedResult = new Buffer(result);
-  
-        if(BrowserifyPluginCanCompile.isNone(options.filename)){
-          chunk["source"] = bufferedResult;
-        } else {
-          Array.prototype.push.call(currentInstance.buffer, bufferedResult);
-          chunk["source"] = "module.export = can.view('" + options.normalizer(file) + "');";
-        }
-        
-        this.push(chunk);
-        callback();
-      });
-      return;
-    }
-
-    this.push(chunk);
-    callback();
+      this.push(chunk);
+      callback();
+    }, (error) => {
+      callback(error);
+    });
   }
   
   /**
@@ -396,27 +401,32 @@ export default class BrowserifyPluginCanCompile {
   /* istanbul ignore next */
   static flushFunction(callback) {
     let currentInstance = BrowserifyPluginCanCompile.getInstance();
-    let options = currentInstance.getOptions();
 
-    if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
-      let writeStream;
-      let file = path.normalize(options.filename);
-      let filePath = path.dirname(file);
+    currentInstance.promise.then((instance) => {
+      let options = instance.getOptions();
   
-      mkdirp.sync(filePath);
-      writeStream = fs.createWriteStream(file, { "flags": "w", "defaultEncoding": "utf8" });
-      writeStream.on('error', (error) => {
-        callback(error);
-      });
-      
-      Array.prototype.forEach.call(currentInstance.buffer, function(item, index){
-        writeStream.write(item);
-      });
-      
-      writeStream.end();
-    }
-    this.push(null);
-    callback();
+      if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
+        let writeStream;
+        let file = path.normalize(options.filename);
+        let filePath = path.dirname(file);
+    
+        mkdirp.sync(filePath);
+        writeStream = fs.createWriteStream(file, { "flags": "w", "defaultEncoding": "utf8" });
+        writeStream.on('error', (error) => {
+          callback(error);
+        });
+        
+        Array.prototype.forEach.call(instance.buffer, function(item, index){
+          writeStream.write(item);
+        });
+        
+        writeStream.end();
+      }
+      this.push(null);
+      callback();
+    }, (error) => {
+      callback(error);
+    });
   }
 }
 

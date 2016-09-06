@@ -32,7 +32,7 @@
     "compile": "$(npm bin)/babel --presets es2015 -d ./ ./src",
     "watch": "node -e \"require('fs').watch('./src/', {\"recursive\": true }, function() { var process = require('child_process').spawn('npm', ['run', 'compile']); process.stdout.on('data', function(data) { console.log(data.toString()); }); })\"",
     "prepublish": "npm run compile",
-    "clean": "node -e \"require('del').sync(['./**/*', '!.*', '!./src', '!./src/**/*', '!./test', '!./test/**/*', '!./node_modules', '!./node_modules/**/*', '!./package.json', '!./canjsBinaryCache', '!./canjsBinaryCache/**/*', '!*.md']);\"",
+    "clean": "node -e \"require('del').sync(['./**/*', '!.*', '!./src', '!./src/**/*', '!./test', '!./test/**/*', '!./node_modules', '!./node_modules/**/*', '!./package.json', '!./canjsBinaryCache', '!./canjsBinaryCache/**/*', '!./*.md']);\"",
     "test": "$(npm bin)/istanbul cover $(npm bin)/_mocha -- -c --recursive --require babel-core/register",
     "test-watch": "$(npm bin)/mocha --require babel-core/register -w -c ./test/*.spec* ./test/**/*.spec*"
   },
