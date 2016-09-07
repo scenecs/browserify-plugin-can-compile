@@ -36,9 +36,6 @@
     "test": "$(npm bin)/istanbul cover $(npm bin)/_mocha -- -c --recursive --require babel-core/register",
     "test-watch": "$(npm bin)/mocha --require babel-core/register -w -c --recursive"
   },
-  "bin": {
-    "getCanCompileVendorLibraries": "./bin/getCanCompileVendorLibraries"
-  },
   "dependencies": {
     "semver": "~5.3.0",
     "mkdirp": "~0.5.1",
