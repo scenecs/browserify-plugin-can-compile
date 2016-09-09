@@ -17,7 +17,7 @@ var chai = require('chai'),
     EventEmitter = require('events'),
     es6Promise = require('es6-promise').polyfill();
 
-var CACHE_DIR_NAME = "can_compile_cache";
+var CACHE_DIR_NAME = "node_modules/.can_compile_cache";
 var version = "2.3.24";
 
 /**************************************************************************************************

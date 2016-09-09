@@ -18,13 +18,13 @@ es6Promise.polyfill();
 
 
 /**
- * @property instance
+ * @property browserifyPluginCanCompileInstance
  * @private
  * @static
  * @type BrowserifyPluginCanCompile
  * @default undefined
  */
-let instance;
+let browserifyPluginCanCompileInstance;
 
 /**
  * Browserify Plugin: browserify-plugin-can-compile
@@ -61,12 +61,13 @@ let instance;
  * 
  * ```javascript
  *  import browserify from 'browserify';
- *  import BrowserifyPluginCanCompile from 'browserify-plugin-can-compile';
+ *  import browserifyPluginCanCompile from 'browserify-plugin-can-compile';
  *
  *  let b = browserify();
  *
  *  b.add('./app.js')
- *   .plugin(BrowserifyPluginCanCompile.compile, {
+ *   .plugin(browserifyPluginCanCompile, {
+ *      "version": "2.3.23",
  *      "filename": "./views-app.js"
  *    })
  *   .bundle().pipe(process.stdout);
@@ -74,7 +75,7 @@ let instance;
  *
  * @class BrowserifyPluginCanCompile
  */
-export default class BrowserifyPluginCanCompile {
+export class BrowserifyPluginCanCompile {
   /**
    *
    * @constructor
@@ -84,7 +85,7 @@ export default class BrowserifyPluginCanCompile {
    *    be piped to the module "can-compile".
    * @see https://github.com/canjs/can-compile#programmatically
    */
-  constructor(bundle, options){
+  constructor(bundle, options) {
     /**
      * @property buffer
      * @private
@@ -112,6 +113,13 @@ export default class BrowserifyPluginCanCompile {
         "mustache": "mustache"
       },
       "paths": undefined,
+      "requirePaths": {
+        'jquery': 'jquery',
+        'can': 'can',
+        'ejs': 'can/view/ejs/ejs',
+        'stache': 'can/view/stache/stache',
+        'mustache': 'can/view/mustache/mustache'
+      },
       "filename": undefined,
       "version": undefined,
       "normalizer": undefined,
@@ -119,7 +127,7 @@ export default class BrowserifyPluginCanCompile {
       "wrapperForExternalTemplateFile": undefined,
       "cacheCanCompileScripts": true
     };
-    
+
     /**
      * contains the passed browserify instance
      *
@@ -132,19 +140,19 @@ export default class BrowserifyPluginCanCompile {
     /**
      * @property promise
      * @type Promise
-     * @default new Promise((resolve, reject) => {})
+     * @default Promise.resolve(this)
      */
-    this.promise = new Promise((resolve, reject) => {});
+    this.promise = Promise.resolve(this);
     
     if(!bundle || !bundle.pipeline) {
       throw new Error('The passed parameter "bundle" seems to be not a valid instance of "Browserify"!');
     }
+    this.browserifyInstance = bundle;
+    
     
     if(!options || !options.version) {
       throw new Error('Missing option "options.version"! Pass the currently used version of canJS.');
     }
-
-    this.browserifyInstance = bundle;
     this.setOptions(options);
     
     if(this.constructor.isNone(this.options.normalizer)) {
@@ -152,32 +160,23 @@ export default class BrowserifyPluginCanCompile {
     }
 
     if(this.constructor.isNone(this.options.paths) && true === this.options.cacheCanCompileScripts) {
-      let canCompileScriptsCache = CanCompileScriptsCache.createCache(this.options.version);
-
-      /* istanbul ignore next */
-      canCompileScriptsCache.on("ready", (instance) => {
-        this.setPaths(instance.getPaths());
-        this.promise = Promise.resolve(instance);
-      });
-      
-      /* istanbul ignore next */
-      canCompileScriptsCache.on('error', (error) => {
-        this.promise = Promise.reject(error);
+      this.promise = new Promise((resolve, reject) => {
+        let canCompileScriptsCache = CanCompileScriptsCache.createCache(this.options.version);
+  
+        /* istanbul ignore next */
+        canCompileScriptsCache.on("finish", (files) => {
+          this.setPaths(files);
+          resolve(this);
+        });
+        
+        /* istanbul ignore next */
+        canCompileScriptsCache.on('error', (error) => {
+          reject(error);
+        });
       });
     }
     
     this.extendBrowserifyPipeline();
-  }
-
-  /**
-   * @method extendBrowserifyPipeline
-   * @private
-   */
-  extendBrowserifyPipeline() {
-    let bundle = this.browserifyInstance;
-    // Browserify has an internal labeled-stream-splicer pipeline.
-    // The Stream will be extended the state "deps".
-    bundle.pipeline.get("deps").splice(1, 0, through2.obj(this.constructor.transformFunction, this.constructor.flushFunction));
   }
 
   /**
@@ -234,6 +233,15 @@ export default class BrowserifyPluginCanCompile {
   }
 
   /**
+   * @method extendBrowserifyPipeline
+   * @private
+   */
+  extendBrowserifyPipeline() {
+    const instance = this.browserifyInstance;
+    instance.transform(BrowserifyPluginCanCompile.transform);
+  }
+  
+  /**
    * Creates a Regular Expressions for the defined template extensions.
    *
    * @method getFileExtensionRegExp
@@ -286,7 +294,7 @@ export default class BrowserifyPluginCanCompile {
   }
 
   /**
-   * @method compile
+   * @method addPlugin
    * @static
    * @param {Browserify} bundle Browserify instance
    * @see https://github.com/substack/node-browserify#browserifyfiles--opts
@@ -295,11 +303,14 @@ export default class BrowserifyPluginCanCompile {
    * @see https://github.com/canjs/can-compile#programmatically
    * @return {BrowserifyPluginCanCompile}
    */
-  static compile(bundle, options) {
-    if(!instance) {
-      instance = new BrowserifyPluginCanCompile(bundle, options);
-    }
+  static addPlugin(bundle, options) {
+    let instance;
     
+    try {
+      instance = BrowserifyPluginCanCompile.getInstance();
+    } catch(error) {
+      browserifyPluginCanCompileInstance = instance = new BrowserifyPluginCanCompile(bundle, options);
+    }
     return instance;
   }
   
@@ -309,7 +320,11 @@ export default class BrowserifyPluginCanCompile {
    * @return {BrowserifyPluginCanCompile} Returns the current instance
    */
   static getInstance() {
-    return instance;
+    if(!browserifyPluginCanCompileInstance) {
+      throw new Error('No existing "BrowserifyPluginCanCompile" instance! Create a new instance with "browserifyPluginCanCompile.addPlugin(bundle, options)"');
+    }
+    
+    return browserifyPluginCanCompileInstance;
   }
   
   /**
@@ -317,7 +332,108 @@ export default class BrowserifyPluginCanCompile {
    * @static
    */
   static reset() {
-    instance = undefined;
+    browserifyPluginCanCompileInstance = undefined;
+  }
+
+
+
+  /**
+   * @method transform
+   * @static
+   * @private
+   * @param {String} file path of the current file
+   * @return {BrowserifyPluginCanCompile}
+   */
+  static transform(file) {
+    const instance = BrowserifyPluginCanCompile.getInstance();
+    const fileExtRegEx = instance.getFileExtensionRegExp();
+    
+    if(!fileExtRegEx.test(file)) {
+      return through2.obj();
+    }
+    
+    return through2.obj(BrowserifyPluginCanCompile.transformFunction(file), BrowserifyPluginCanCompile.flushFunction());
+  }
+
+  /**
+   * @method transformFunction
+   * @private
+   * @static
+   * @param {String} file
+   * @return {Function} Returns the transform function
+   */
+  static transformFunction(file) {
+    const _file = file;
+
+    return function transform(chunk, encoding, callback){
+      let currentInstance = BrowserifyPluginCanCompile.getInstance();
+      currentInstance.promise.then((instance) => {
+        let options = instance.getOptions();
+        let currentWrapper = options.wrapper;
+      
+        if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
+          currentWrapper = options.wrapperForExternalTemplateFile;
+        }
+    
+        canCompiler(_file, options, (err, result) => {
+          if(err) {
+            return callback(err);
+          }
+          let bufferedResult = new Buffer(result, "utf8");
+    
+          if(BrowserifyPluginCanCompile.isNone(options.filename)){
+            chunk = bufferedResult;
+          } else {
+            Array.prototype.push.call(instance.buffer, bufferedResult);
+            chunk = new Buffer("module.export = can.view('" + options.normalizer(_file) + "');", "utf8");
+          }
+          
+          this.push(chunk);
+          callback();
+        });
+      }, (error) => {
+        callback(error);
+      });
+    }
+  }
+  
+  /**
+   * @method flushFunction
+   * @private
+   * @static
+   * @return {Function} Returns the flush function
+   */
+  static flushFunction() {
+    
+    return function flush(callback){
+      let currentInstance = BrowserifyPluginCanCompile.getInstance();
+    
+      currentInstance.promise.then((instance) => {
+        let options = instance.getOptions();
+    
+        if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
+          let writeStream;
+          let file = path.normalize(options.filename);
+          let filePath = path.dirname(file);
+      
+          mkdirp.sync(filePath);
+          writeStream = fs.createWriteStream(file, { "flags": "w", "defaultEncoding": "utf8" });
+          writeStream.on('error', (error) => {
+            callback(error);
+          });
+          
+          Array.prototype.forEach.call(instance.buffer, function(item, index){
+            writeStream.write(item);
+          });
+          
+          writeStream.end();
+        }
+        this.push(null);
+        callback();
+      }, (error) => {
+        callback(error);
+      });
+    }
   }
 
   /**
@@ -340,94 +456,6 @@ export default class BrowserifyPluginCanCompile {
   static isNone(obj) {
     return obj === null || obj === undefined;
   }
-  
-  /**
-   * @method transformFunction
-   * @private
-   * @static
-   * @param {String|Buffer} chunk
-   * @param {String} encoding
-   * @param {Function} callback
-   */
-  /* istanbul ignore next */
-  static transformFunction(chunk, encoding, callback) {
-    let currentInstance = BrowserifyPluginCanCompile.getInstance();
-    
-    currentInstance.promise.then((instance) => {
-      let options = instance.getOptions();
-      let file = chunk["id"];
-      let fileExtRegEx = instance.getFileExtensionRegExp();
-      let currentWrapper = options.wrapper;
-    
-      if(fileExtRegEx.test(file)) {
-    
-        if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
-          currentWrapper = options.wrapperForExternalTemplateFile;
-        }
-  
-        canCompiler(file, options, (err, result) => {
-          if(err) {
-            return callback(err);
-          }
-    
-          let bufferedResult = new Buffer(result);
-    
-          if(BrowserifyPluginCanCompile.isNone(options.filename)){
-            chunk["source"] = bufferedResult;
-          } else {
-            Array.prototype.push.call(instance.buffer, bufferedResult);
-            chunk["source"] = "module.export = can.view('" + options.normalizer(file) + "');";
-          }
-          
-          this.push(chunk);
-          callback();
-        });
-        return;
-      }
-  
-      this.push(chunk);
-      callback();
-    }, (error) => {
-      callback(error);
-    });
-  }
-  
-  /**
-   * @method flushFunction
-   * @private
-   * @static
-   * @param {Function} callback(error)
-   */
-  /* istanbul ignore next */
-  static flushFunction(callback) {
-    let currentInstance = BrowserifyPluginCanCompile.getInstance();
-
-    currentInstance.promise.then((instance) => {
-      let options = instance.getOptions();
-  
-      if(!BrowserifyPluginCanCompile.isNone(options.filename)) {
-        let writeStream;
-        let file = path.normalize(options.filename);
-        let filePath = path.dirname(file);
-    
-        mkdirp.sync(filePath);
-        writeStream = fs.createWriteStream(file, { "flags": "w", "defaultEncoding": "utf8" });
-        writeStream.on('error', (error) => {
-          callback(error);
-        });
-        
-        Array.prototype.forEach.call(instance.buffer, function(item, index){
-          writeStream.write(item);
-        });
-        
-        writeStream.end();
-      }
-      this.push(null);
-      callback();
-    }, (error) => {
-      callback(error);
-    });
-  }
 }
 
-module.exports = BrowserifyPluginCanCompile;
+export default BrowserifyPluginCanCompile.addPlugin;

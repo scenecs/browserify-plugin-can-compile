@@ -19,11 +19,11 @@ import canCompileResolveScripts from 'can-compile/lib/resolveScripts';
 es6Promise.polyfill();
 
 
-const CACHE_DIR_NAME = "can_compile_cache";
+const CACHE_DIR_NAME = "node_modules/.can_compile_cache";
 
 /**
  * CanCompileScriptsCache
- * =================
+ * =======================
  *
  *
  *

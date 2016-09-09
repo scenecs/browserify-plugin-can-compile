@@ -9,7 +9,7 @@
 var chai = require('chai'),
     should = chai.should(),
     browserify = require('browserify'),
-    BrowserifyPluginCanCompile = require('../src'),
+    BrowserifyPluginCanCompile = require('../src').BrowserifyPluginCanCompile,
     del = require('del'),
     path = require('path'),
     fs = require('fs'),
@@ -17,40 +17,40 @@ var chai = require('chai'),
 
 
 describe('BrowserifyPluginCanCompile', function(){
-  describe('#compile(bundle, options)', function(){
+  describe('BrowserifyPluginCanCompile.addPlugin(bundle, options)', function(){
     
     afterEach(function(){
       BrowserifyPluginCanCompile.reset();
     });
     
     it('throw an error, if the passed parameter "bundle" is not a vaild instance of "Browserify"', function(){
-      (function(){ BrowserifyPluginCanCompile.compile(); }).should.throw(/The passed parameter "bundle" seems to be not a valid instance of "Browserify"/);
-      (function(){ BrowserifyPluginCanCompile.compile({"test": "haha"}); }).should.throw(/The passed parameter "bundle" seems to be not a valid instance of "Browserify"/);
+      (function(){ BrowserifyPluginCanCompile.addPlugin(); }).should.throw(/The passed parameter "bundle" seems to be not a valid instance of "Browserify"/);
+      (function(){ BrowserifyPluginCanCompile.addPlugin({"test": "haha"}); }).should.throw(/The passed parameter "bundle" seems to be not a valid instance of "Browserify"/);
     });
     
     it('throw an error, if the currently used version of canJS is not set', function(){
-      (function(){ BrowserifyPluginCanCompile.compile(browserify()); }).should.throw(/Missing option "options.version"/);
+      (function(){ BrowserifyPluginCanCompile.addPlugin(browserify()); }).should.throw(/Missing option "options.version"/);
     });
     
     it('create an instance of BrowserifyPluginCanCompile', function(){
-      (BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []})).should.be.an.instanceof(BrowserifyPluginCanCompile);
+      (BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []})).should.be.an.instanceof(BrowserifyPluginCanCompile);
     });
     
     it('set the default normalizer function, if no normalizer is passed', function(){
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []});
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []});
       (instance.options.normalizer.toString()).should.be.eql((instance.getDefaultNormalizer()).toString());
       instance = undefined;
     });
     
     it('overwrite the default normalizer function', function(){
       var dummyFunction = function(){};
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": [], "normalizer": dummyFunction});
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": [], "normalizer": dummyFunction});
       (instance.options.normalizer.toString()).should.be.eql(dummyFunction.toString());
       instance = undefined;
     });
     
     it('disable caching of can-compile vendor scripts', function(){
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "cacheCanCompileScripts": false});
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "cacheCanCompileScripts": false});
       (instance.options.cacheCanCompileScripts).should.be.false;
     });
     
@@ -61,24 +61,24 @@ describe('BrowserifyPluginCanCompile', function(){
           "./test3.js",
           "./test4.js"
         ];
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": vendorScripts});
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": vendorScripts});
       (instance.options.paths).should.be.equal(vendorScripts);
     });
     
     it('allow caching of the can-compile vendor scripts', function(){
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21"});
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21"});
     });
   });
   
   describe('#extendBrowserifyPipeline()', function(){
     it('extend the browserify pipeline "deps" with with the duplex stream', function(){
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "cacheCanCompileScripts": false});
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "cacheCanCompileScripts": false});
       var newBrowserifyInstance = browserify();
-      var numberOfPipelineStreams = newBrowserifyInstance.pipeline.get('deps').length;
+      var numberOfTransformers = newBrowserifyInstance._transformOrder;
       
       instance.browserifyInstance = newBrowserifyInstance;
       instance.extendBrowserifyPipeline();
-      (instance.browserifyInstance.pipeline.get('deps').length).should.be.equal(numberOfPipelineStreams+=1);
+      (instance.browserifyInstance._transformOrder).should.be.equal(numberOfTransformers+=1);
     });
   });
   
@@ -92,7 +92,7 @@ describe('BrowserifyPluginCanCompile', function(){
     ];
     
     beforeEach(function(){
-      instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []});
+      instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []});
     });
     
     afterEach(function(){
@@ -127,7 +127,7 @@ describe('BrowserifyPluginCanCompile', function(){
     var instance = undefined;
     
     beforeEach(function(){
-      instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []});
+      instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []});
     });
     
     afterEach(function(){
@@ -154,7 +154,7 @@ describe('BrowserifyPluginCanCompile', function(){
     ];
 
     beforeEach(function(){
-      instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": ["./test1.js", "./test2.js"]});
+      instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": ["./test1.js", "./test2.js"]});
     });
     
     afterEach(function(){
@@ -179,7 +179,7 @@ describe('BrowserifyPluginCanCompile', function(){
     var newPaths = ["./test2.js", "./test3.js"];
 
     beforeEach(function(){
-      instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": newPaths});
+      instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": newPaths});
     });
     
     afterEach(function(){
@@ -201,7 +201,7 @@ describe('BrowserifyPluginCanCompile', function(){
     ];
 
     beforeEach(function(){
-      instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []});
+      instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []});
     });
     
     afterEach(function(){
@@ -224,7 +224,7 @@ describe('BrowserifyPluginCanCompile', function(){
     var normalizer;
     
     before(function(){
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []});
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []});
       normalizer = instance.getDefaultNormalizer();
     });
     
@@ -258,7 +258,42 @@ describe('BrowserifyPluginCanCompile', function(){
     });
   });
   
-  describe('#isNone()', function(){
+  describe('BrowserifyPluginCanCompile.getInstance()', function(){
+    
+    it('throw an error, if no instance exist', function(){
+      (function(){ BrowserifyPluginCanCompile.getInstance(); }).should.throw(/No existing "BrowserifyPluginCanCompile" instance/);
+    });
+    
+    it('return the current instance', function(){
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []});
+
+      (instance).should.be.eql(BrowserifyPluginCanCompile.getInstance());
+      instance = BrowserifyPluginCanCompile.reset();
+    });
+  });
+  
+  describe('BrowserifyPluginCanCompile.reset()', function(){
+    it('reset the current instance', function(){
+      var instance = BrowserifyPluginCanCompile.addPlugin(browserify(), {"version": "2.3.21", "paths": []});
+
+      instance = BrowserifyPluginCanCompile.reset();
+      (function(){ BrowserifyPluginCanCompile.getInstance(); }).should.throw(/No existing "BrowserifyPluginCanCompile" instance/);
+    });
+  });
+  
+  describe('BrowserifyPluginCanCompile.transform(file)', function(){
+    
+  });
+
+  describe('BrowserifyPluginCanCompile.transformFunction(file)', function(){
+    
+  });
+
+  describe('BrowserifyPluginCanCompile.flushFunction()', function(){
+    
+  });
+  
+  describe('BrowserifyPluginCanCompile.isNone()', function(){
     var testInvalidOptionsParameter = [
       { "args": [], "label": "not defined", "expects": true },
       { "args": [null], "label": "null", "expects": true },
@@ -277,38 +312,5 @@ describe('BrowserifyPluginCanCompile', function(){
         (BrowserifyPluginCanCompile.isNone.apply(null, testItem.args)).should.be.eql(testItem.expects);
       });
     });
-  });
-  
-  describe('#getInstance()', function(){
-    var instance = undefined;
-    
-    beforeEach(function(){
-      instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []});
-    });
-    
-    afterEach(function(){
-      instance = BrowserifyPluginCanCompile.reset();
-    });
-    
-    it('return the current instance', function(){
-      (instance).should.be.eql(BrowserifyPluginCanCompile.getInstance());
-    });
-  });
-  
-  describe('#reset()', function(){
-    it('reset the current instance', function(){
-      var instance = BrowserifyPluginCanCompile.compile(browserify(), {"version": "2.3.21", "paths": []});
-
-      instance = BrowserifyPluginCanCompile.reset();
-      (undefined === BrowserifyPluginCanCompile.getInstance()).should.be.true;
-    });
-  });
-  
-  describe('#transformFunction(chunk, encoding, callback)', function(){
-    
-  });
-
-  describe('#flushFunction(callback)', function(){
-    
   });
 });
