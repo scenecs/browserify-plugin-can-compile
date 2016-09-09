@@ -256,7 +256,7 @@ export class BrowserifyPluginCanCompile {
       throw new Error('Option "extensions" must be a key-value object!');
     }
     
-    let flags = "ig";
+    let flags = "i";
     let fileExtensions = Object.keys(this.options.extensions).map(function(item, index){
       return item.replace(new RegExp("[^\\w-]", flags), "");
     });
@@ -284,7 +284,7 @@ export class BrowserifyPluginCanCompile {
       let filename;
  
       try {
-        filename = (fileExtRegEx.exec(file))[1];
+        filename = (Array.prototype.splice.call(fileExtRegEx.exec(file), 1, 1)).join("");
       } catch(err) {
         filename = file;
       }
