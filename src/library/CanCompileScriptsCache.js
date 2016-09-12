@@ -211,6 +211,9 @@ export default class CanCompileScriptsCache extends EventEmitter {
           }
 
           const target = path.resolve(cachePath, filename);
+          
+          console.info('    Download file: ' + filename + ' ("' + url + '")');
+
           return CanCompileScriptsCache.downloadVendorScript(url, target);
         }))).then((files) => {
             this.setCachedFiles(files);

@@ -216,7 +216,7 @@ describe('BrowserifyPluginCanCompile', function(){
     });
     
     it('creates a regular expressions form the property "options.extensions"', function(){
-      (instance.getFileExtensionRegExp()).should.be.eql(new RegExp('^.*\/([\\w-]+)\\.(stache|ejs|mustache)$', "gi"));
+      (instance.getFileExtensionRegExp()).should.be.eql(new RegExp('^.*\/([\\w-]+)\\.(stache|ejs|mustache)$', "i"));
     });
   });
   

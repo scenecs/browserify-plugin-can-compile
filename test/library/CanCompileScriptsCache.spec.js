@@ -483,7 +483,7 @@ describe('CanCompileScriptsCache', function(){
         CanCompileScriptsCache.downloadVendorScript("Foo.bar", path.resolve(testCacheDir, "test.js"))
         .then(reject, function(error){
           (error).should.be.an.instanceof(Error);
-          (error).should.match(/In-valid url/);            
+          (error).should.match(/In-valid url/);
           resolve();
         })
         .catch(reject);
