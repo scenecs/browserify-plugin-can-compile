@@ -16,16 +16,6 @@ import es6Promise from 'es6-promise';
 // Polyfill
 es6Promise.polyfill();
 
-
-/**
- * @property browserifyPluginCanCompileInstance
- * @private
- * @static
- * @type BrowserifyPluginCanCompile
- * @default undefined
- */
-let browserifyPluginCanCompileInstance;
-
 /**
  * Browserify Plugin: browserify-plugin-can-compile
  * =================================================
@@ -238,7 +228,7 @@ export class BrowserifyPluginCanCompile {
    */
   extendBrowserifyPipeline() {
     const instance = this.browserifyInstance;
-    instance.transform(BrowserifyPluginCanCompile.transform);
+    instance.transform(BrowserifyPluginCanCompile.transform(this));
   }
   
   /**
@@ -280,9 +270,9 @@ export class BrowserifyPluginCanCompile {
   getDefaultNormalizer() {
     let fileExtRegEx = this.getFileExtensionRegExp();
  
-    return function normalizer(file){
+    return function normalizer(file) {
       let filename;
- 
+      
       try {
         filename = (Array.prototype.splice.call(fileExtRegEx.exec(file), 1, 1)).join("");
       } catch(err) {
@@ -290,52 +280,8 @@ export class BrowserifyPluginCanCompile {
       }
  
       return filename;
-    }
+    };
   }
-
-  /**
-   * @method addPlugin
-   * @static
-   * @param {Browserify} bundle Browserify instance
-   * @see https://github.com/substack/node-browserify#browserifyfiles--opts
-   * @param {Object} options Can-compile options to influence the compile process. This options will
-   *    be piped to the module "can-compile".
-   * @see https://github.com/canjs/can-compile#programmatically
-   * @return {BrowserifyPluginCanCompile}
-   */
-  static addPlugin(bundle, options) {
-    let instance;
-    
-    try {
-      instance = BrowserifyPluginCanCompile.getInstance();
-    } catch(error) {
-      browserifyPluginCanCompileInstance = instance = new BrowserifyPluginCanCompile(bundle, options);
-    }
-    return instance;
-  }
-  
-  /**
-   * @method getInstance
-   * @static
-   * @return {BrowserifyPluginCanCompile} Returns the current instance
-   */
-  static getInstance() {
-    if(!browserifyPluginCanCompileInstance) {
-      throw new Error('No existing "BrowserifyPluginCanCompile" instance! Create a new instance with "browserifyPluginCanCompile.addPlugin(bundle, options)"');
-    }
-    
-    return browserifyPluginCanCompileInstance;
-  }
-  
-  /**
-   * @method reset
-   * @static
-   */
-  static reset() {
-    browserifyPluginCanCompileInstance = undefined;
-  }
-
-
 
   /**
    * @method transform
@@ -344,29 +290,31 @@ export class BrowserifyPluginCanCompile {
    * @param {String} file path of the current file
    * @return {BrowserifyPluginCanCompile}
    */
-  static transform(file) {
-    const instance = BrowserifyPluginCanCompile.getInstance();
+  static transform(instance) {
+    const currentInstance = instance;
     const fileExtRegEx = instance.getFileExtensionRegExp();
     
-    if(!fileExtRegEx.test(file)) {
-      return through2.obj();
+    return function transform(file) {
+      if(!fileExtRegEx.test(file)) {
+        return through2.obj();
+      }
+      
+      return through2.obj(BrowserifyPluginCanCompile.transformFunction(currentInstance, file), BrowserifyPluginCanCompile.flushFunction(currentInstance));
     }
-    
-    return through2.obj(BrowserifyPluginCanCompile.transformFunction(file), BrowserifyPluginCanCompile.flushFunction());
   }
 
   /**
    * @method transformFunction
-   * @private
    * @static
+   * @private
    * @param {String} file
    * @return {Function} Returns the transform function
    */
-  static transformFunction(file) {
+  static transformFunction(instance, file) {
+    const currentInstance = instance;
     const _file = file;
 
     return function transform(chunk, encoding, callback){
-      let currentInstance = BrowserifyPluginCanCompile.getInstance();
       currentInstance.promise.then((instance) => {
         let options = instance.getOptions();
         let currentWrapper = options.wrapper;
@@ -399,14 +347,14 @@ export class BrowserifyPluginCanCompile {
   
   /**
    * @method flushFunction
-   * @private
    * @static
+   * @private
    * @return {Function} Returns the flush function
    */
-  static flushFunction() {
+  static flushFunction(instance) {
+    const currentInstance = instance;
     
     return function flush(callback){
-      let currentInstance = BrowserifyPluginCanCompile.getInstance();
     
       currentInstance.promise.then((instance) => {
         let options = instance.getOptions();
@@ -434,6 +382,20 @@ export class BrowserifyPluginCanCompile {
         callback(error);
       });
     }
+  }
+
+  /**
+   * @method addPlugin
+   * @static
+   * @param {Browserify} bundle Browserify instance
+   * @see https://github.com/substack/node-browserify#browserifyfiles--opts
+   * @param {Object} options Can-compile options to influence the compile process. This options will
+   *    be piped to the module "can-compile".
+   * @see https://github.com/canjs/can-compile#programmatically
+   * @return {BrowserifyPluginCanCompile}
+   */
+  static addPlugin(bundle, options) {
+    return new BrowserifyPluginCanCompile(bundle, options);
   }
 
   /**
