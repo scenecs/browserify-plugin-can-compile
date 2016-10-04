@@ -10,7 +10,7 @@ import through2 from 'through2';
 import canCompiler from 'can-compile';
 import fs from 'fs';
 import path from 'path';
-import CanCompileScriptsCache from './library/CanCompileScriptsCache';
+import CanCompileScriptsCacheManager from './library/CanCompileScriptsCacheManager';
 import es6Promise from 'es6-promise';
 
 // Polyfill
@@ -151,18 +151,13 @@ export class BrowserifyPluginCanCompile {
 
     if(this.constructor.isNone(this.options.paths) && true === this.options.cacheCanCompileScripts) {
       this.promise = new Promise((resolve, reject) => {
-        let canCompileScriptsCache = CanCompileScriptsCache.createCache(this.options.version);
-  
-        /* istanbul ignore next */
-        canCompileScriptsCache.on("finish", (files) => {
-          this.setPaths(files);
-          resolve(this);
-        });
+        const canCompileScriptsCacheManager = CanCompileScriptsCacheManager.getInstance();
         
-        /* istanbul ignore next */
-        canCompileScriptsCache.on('error', (error) => {
-          reject(error);
-        });
+        canCompileScriptsCacheManager.createCache(this.options.version).then(
+          (files) => {
+            this.setPaths(files);
+            resolve(this);
+          }, reject);
       });
     }
     
