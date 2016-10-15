@@ -89,11 +89,26 @@ export class BrowserifyPluginCanCompile {
      * @private
      * @type Object
      * @default {
-     *   "extensions": {
-     *     "stache": "stache",
-     *     "ejs": "ejs",
-     *     "mustache": "mustache"
-     *   }
+     *    "extensions": {
+     *      "stache": "stache",
+     *      "ejs": "ejs",
+     *      "mustache": "mustache"
+     *    },
+     *    "paths": undefined,
+     *    "requirePaths": {
+     *      'jquery': 'jquery',
+     *      'can': 'can',
+     *      'ejs': 'can/view/ejs/ejs',
+     *      'stache': 'can/view/stache/stache',
+     *      'mustache': 'can/view/mustache/mustache'
+     *    },
+     *    "filename": undefined,
+     *    "version": undefined,
+     *    "normalizer": undefined,
+     *    "wrapper": 'module.exports = {{{content}}};',
+     *    "wrapperForExternalTemplateFile": undefined,
+     *    "cacheCanCompileScripts": true,
+     *    "transformGlobally": true
      * }
      */
     this.options = {
@@ -115,7 +130,8 @@ export class BrowserifyPluginCanCompile {
       "normalizer": undefined,
       "wrapper": 'module.exports = {{{content}}};',
       "wrapperForExternalTemplateFile": undefined,
-      "cacheCanCompileScripts": true
+      "cacheCanCompileScripts": true,
+      "transformGlobally": true
     };
 
     /**
@@ -193,6 +209,14 @@ export class BrowserifyPluginCanCompile {
   }
   
   /**
+   * @method shouldBeTransformedGlobally
+   * @return {Boolean} Returns true, if options.global === true.
+   */
+  shouldBeTransformedGlobally() {
+    return (true === this.options.transformGlobally);
+  }
+   
+  /**
    * @method setPaths
    * @private
    * @chainable 
@@ -223,7 +247,11 @@ export class BrowserifyPluginCanCompile {
    */
   extendBrowserifyPipeline() {
     const instance = this.browserifyInstance;
-    instance.transform(BrowserifyPluginCanCompile.transform(this));
+    const transformOption = {
+      "global": this.shouldBeTransformedGlobally()
+    };
+    
+    instance.transform(BrowserifyPluginCanCompile.transform(this), transformOption);
   }
   
   /**
