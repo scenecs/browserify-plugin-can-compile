@@ -220,12 +220,12 @@ export class BrowserifyPluginCanCompile {
    * @method setPaths
    * @private
    * @chainable 
-   * @param {Array} paths
+   * @param {Object} paths
    * @return {BrowserifyPluginCanCompile}
    */
   setPaths(paths) {
-    if(!Array.isArray(paths)) {
-      throw new Error('The passed parameter "paths" must be an array!');
+    if('object' !== typeof paths || Array.isArray(paths)) {
+      throw new Error('The passed parameter "paths" must be an object!');
     }
 
     this.options.paths = paths;
