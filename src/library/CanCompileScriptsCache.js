@@ -199,8 +199,8 @@ export default class CanCompileScriptsCache extends EventEmitter {
     return new Promise((resolve, reject) => {
       (this.readCachedFiles()).then((files) => {
         this.setCachedFiles(files);
-        this.emit('finish', this.getCachedFiles());
-        resolve(files);
+        this.emit('finish', CanCompileScriptsCache.convertToCanCompilePathsObject(this.getCachedFiles()));
+        resolve(CanCompileScriptsCache.convertToCanCompilePathsObject(this.getCachedFiles()));
       }, (error) => {
         mkdirp.sync(this.getCachePath());
         (Promise.all(Array.prototype.map.call(this.getNeededVendorScripts(), (url, index) => {
@@ -218,11 +218,13 @@ export default class CanCompileScriptsCache extends EventEmitter {
         }))).then((files) => {
             this.setCachedFiles(files);
             console.info('    Download finished.');
-            this.emit('finish', this.getCachedFiles());
+            this.emit('finish', CanCompileScriptsCache.convertToCanCompilePathsObject(this.getCachedFiles()));
+            resolve(CanCompileScriptsCache.convertToCanCompilePathsObject(this.getCachedFiles()));
           }, (error) => {
             console.error('    Download failed: ' + error);
             this.emit('error', error);
-          }).then(resolve, reject);
+            reject(error);
+          });
       });
     });
   }
@@ -287,7 +289,7 @@ export default class CanCompileScriptsCache extends EventEmitter {
    * @method getListOfVendorScripts
    * @static
    * @param {String} version
-   * @return {Array} Returns a list of vendor scripts.
+   * @return {Object} Returns a collection of vendor scripts.
    */
   static getListOfVendorScripts(version) {
     if(semver.valid(version)) {
@@ -318,6 +320,61 @@ export default class CanCompileScriptsCache extends EventEmitter {
     
     const filename = Array.prototype.pop.call(url.split("/"));
     return (-1 < filename.indexOf(".")) ? filename : undefined;
+  }
+
+  /**
+   * @static
+   * @param {Array} files
+   * @return {Object} Returns the expected can-compile paths object.
+   */
+  static convertToCanCompilePathsObject(files) {
+    if(!(Array.isArray(files) && files.length > 0)) {
+      throw new Error('The passed parameter "cachedFiles" must be an array!');
+    }
+
+    const pathsObject = {};
+
+    Array.prototype.map.call(files, (file, index) => {
+      const scriptType = CanCompileScriptsCache.getScriptType(file);
+
+      if(scriptType) {
+        pathsObject[scriptType] = file;
+      }
+    });
+    
+    return pathsObject;
+  }
+  
+  /**
+   * @private
+   * @static
+   * @param {string} filePath
+   * @return {string} Returns the type of the script.
+   */
+  static getScriptType(filePath) {
+      const filename = CanCompileScriptsCache.getFilenameFromUrl(filePath);
+      
+      if(filename.indexOf('/jquery') > -1) {
+          return 'jquery';
+      }
+
+      if(filename.indexOf('ejs') > -1) {
+          return 'ejs';
+      }
+
+      if(filename.indexOf('mustache') > -1) {
+          return 'mustache';
+      }
+
+      if(filename.indexOf('stache') > -1) {
+          return 'stache';
+      }
+
+      if(filename.indexOf('/can') > -1) {
+          return 'can';
+      }
+
+      return undefined;
   }
 }
 
