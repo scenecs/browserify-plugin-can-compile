@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import http from 'http';
+import http from 'follow-redirects/http';
 import semver from 'semver';
 import mkdirp from 'mkdirp';
 import es6Promise from 'es6-promise';

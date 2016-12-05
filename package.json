@@ -42,7 +42,8 @@
     "extend": "~3.0.0",
     "through2": "~2.0.1",
     "can-compile": "~0.10.2",
-    "es6-promise": "~3.2.1"
+    "es6-promise": "~3.2.1",
+    "follow-redirects": "~1.1.0"
   },
   "devDependencies": {
     "babel-cli": "~6.14.0",
