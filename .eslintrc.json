@@ -1,0 +1,40 @@
+{
+    "extends": [
+        "eslint:all"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module"
+    },
+    "env": {
+        "node": true,
+        "es6": true
+    },
+    "rules": {
+        "max-len": ["error", 120, { "ignoreTrailingComments": true }],
+        "space-before-function-paren": ["error", {
+            "anonymous": "always",
+            "named": "never"
+        }],
+        "quotes": ["error", "single"],
+        "quote-props": ["error", "consistent-as-needed"],
+        "padded-blocks": ["error", "never"],
+        "init-declarations": ["error", "never", { "ignoreForLoopInit": true }],
+        "lines-around-comment": ["error", { "beforeBlockComment": true, "allowBlockStart": true }],
+        "one-var-declaration-per-line": ["error", "always"],
+        "one-var": ["error", "never"],
+        "no-undefined": "off",
+        "prefer-reflect": ["warn"],
+        "no-magic-numbers": "off",
+        "multiline-ternary": ["error", "never"],
+        "no-ternary": "off",
+        "no-extra-parens": ["off", "all", { "conditionalAssign": true, "returnAssign": false, "nestedBinaryExpressions": false }],
+        "object-curly-spacing": ["error", "always"],
+        "consistent-return": "error",
+        "no-console": "warn",
+        "max-statements": ["warn", 10],
+        "max-lines": ["warn", { "max": 300, "skipBlankLines": true, "skipComments": true }],
+        "object-property-newline": ["error", { "allowMultiplePropertiesPerLine": true }],
+        "dot-location": ["error", "property"]
+    }
+}

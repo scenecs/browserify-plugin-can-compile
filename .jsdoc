@@ -1,0 +1,35 @@
+{
+    "tags": {
+        "allowUnknownTags": false,
+        "dictionaries": ["jsdoc","closure"]
+    },
+    "source": {
+        "include": ["package.json", "README.md"],
+        "exclude": ["node_modules", "test", "doc"],
+        "includePattern": ".+\\.js(doc|x)?$",
+        "excludePattern": "(^|\\/|\\\\)_"
+    },
+    "plugins": [
+        "plugins/markdown"
+    ],
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": true,
+        "useLongnameInNav": false,
+        "systemName": "ReadMe",
+        "copyright":  "© SCENECS",
+        "theme": "slate",
+        "collapseSymbols": false,
+        "linenums": true,
+        "outputSourceFiles": true,
+        "outputSourcePath": true,
+        "search": true,
+        "includeDate": true
+    },
+    "opts": {
+        "encoding": "utf8",
+        "destination": "./doc",
+        "recurse": true,
+        "access": "all"
+    }
+}

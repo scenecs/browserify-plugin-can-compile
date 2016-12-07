@@ -1,57 +1,65 @@
 {
-  "name": "browserify-plugin-can-compile",
-  "version": "1.2.0-dev",
-  "description": "This Browserify plugin compiles CanJs Templates into an extra Javascript file.",
-  "main": "index.js",
-  "author": "SCENECS <scenecs@t-online.de>",
-  "license": "MIT",
-  "main": "./index.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/scenecs/browserify-plugin-can-compile"
-  },
-  "bugs": {
-    "url": "https://github.com/scenecs/browserify-plugin-can-compile/issues"
-  },
-  "keywords": [
-    "browserify",
-    "plugin",
-    "canjs",
-    "stache",
-    "compiler"
-  ],
-  "directories": {
-    "doc": "./doc/",
-    "test": "./test/"
-  },
-  "engines": {
-    "node" : ">=4.3"
-  },
-  "scripts": {
-    "precompile": "npm run clean",
-    "compile": "$(npm bin)/babel --presets es2015 -d ./ ./src",
-    "watch": "node -e \"require('fs').watch('./src/', {\"recursive\": true }, function() { var process = require('child_process').spawn('npm', ['run', 'compile']); process.stdout.on('data', function(data) { console.log(data.toString()); }); })\"",
-    "prepublish": "npm run compile",
-    "clean": "node -e \"require('del').sync(['./**/*', '!.*', '!./src', '!./src/**/*', '!./test', '!./test/**/*', '!./node_modules', '!./node_modules/**/*', '!./package.json', '!./canjsBinaryCache', '!./canjsBinaryCache/**/*', '!./*.md']);\"",
-    "test": "$(npm bin)/istanbul cover $(npm bin)/_mocha -- -c --recursive --require babel-core/register",
-    "test-watch": "$(npm bin)/mocha --require babel-core/register -w -c --recursive"
-  },
-  "dependencies": {
-    "semver": "~5.3.0",
-    "mkdirp": "~0.5.1",
-    "extend": "~3.0.0",
-    "through2": "~2.0.1",
-    "can-compile": "~0.10.2",
-    "es6-promise": "~3.2.1",
-    "follow-redirects": "~1.1.0"
-  },
-  "devDependencies": {
-    "babel-cli": "~6.14.0",
-    "babel-preset-es2015": "~6.14.0",
-    "del": "~2.2.2",
-    "instanbul": "gotwarlost/istanbul#v1.1.0-alpha.1",
-    "chai": "~3.5.0",
-    "mocha": "~3.0.2",
-    "browserify": "~13.1.0"
-  }
+    "name": "browserify-plugin-can-compile",
+    "version": "1.2.3-dev",
+    "description": "This Browserify plugin compiles CanJs Templates into an extra Javascript file.",
+    "main": "index.js",
+    "author": "SCENECS <scenecs@t-online.de>",
+    "license": "MIT",
+    "main": "./index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/scenecs/browserify-plugin-can-compile"
+    },
+    "bugs": {
+        "url": "https://github.com/scenecs/browserify-plugin-can-compile/issues"
+    },
+    "keywords": [
+        "browserify",
+        "plugin",
+        "canjs",
+        "stache",
+        "compiler"
+    ],
+    "directories": {
+        "doc": "./doc/",
+        "test": "./test/"
+    },
+    "engines": {
+        "node" : ">=6.8.1"
+    },
+    "scripts": {
+        "test": "npm run test:lint && npm run test:unit:coverage",
+        "test:lint": "$(npm bin)/eslint --ext .js --format stylish  **/*.js ./test/unit/**/*.js",
+        "test:lint:xml": "$(npm bin)/eslint --ext .js --format checkstyle --output-file ./_TEST_RESULTS/lint/checkstyle-lint.xml  **/*.js ./test/unit/**/*.js",
+        "test:lint:dev": "$(npm bin)/watch '$(npm bin)/eslint --ext .js --format stylish *.js **/*.js ./test/unit/*.js ./test/unit/**/*.js' ./",
+        "test:unit": "$(npm bin)/mocha --require jsdom-global/register -c --recursive test/unit/*.spec.js",
+        "test:unit:xml": "$(npm bin)/mocha --require jsdom-global/register -c --recursive --reporter xunit --reporter-options output=./_TEST_RESULTS/unit/xunit.xml test/unit//*.spec.js",
+        "test:unit:dev": "$(npm bin)/mocha --require jsdom-global/register -w -c --recursive test/unit/*.spec.js",
+        "test:unit:coverage": "$(npm bin)/istanbul cover --report lcov --print detail --dir ./_TEST_RESULTS/coverage $(npm bin)/_mocha -- --require jsdom-global/register -c --recursive test/unit/*.spec.js",
+        "test:unit:coverage:xml": "$(npm bin)/istanbul cover --report clover --print detail --dir ./_TEST_RESULTS/coverage $(npm bin)/_mocha -- --require jsdom-global/register -c --recursive test/unit/*.spec.js",
+        "doc": "$(npm bin)/jsdoc --configure ./.jsdoc ./*.js ./**/*.js",
+        "doc:dev": "$(npm bin)/watch '$(npm bin)/jsdoc --configure ./.jsdoc ./*.js' ./",
+        "doc:markdown": "mkdir -p ./doc && $(npm bin)/jsdoc2md ./*.js > ./doc/index.md"
+    },
+    "dependencies": {
+        "semver": "~5.3.0",
+        "mkdirp": "~0.5.1",
+        "extend": "~3.0.0",
+        "through2": "~2.0.1",
+        "can-compile": "~0.10.2",
+        "follow-redirects": "~1.1.0"
+    },
+    "devDependencies": {
+        "del": "~2.2.2",
+        "instanbul": "gotwarlost/istanbul#v1.1.0-alpha.1",
+        "chai": "~3.5.0",
+        "mocha": "~3.0.2",
+        "browserify": "~13.1.1",
+        "eslint": "~3.8.1",
+        "jsdoc": "~3.4.2",
+        "jsdoc-to-markdown": "~2.0.1",
+        "jsdom": "~9.8.3",
+        "jsdom-global": "~2.1.0",
+        "watch": "~1.0.1"
+    }
 }
