@@ -1,18 +1,18 @@
-/* eslint-env node, mocha */
 /**
  * @module browserify-plugin-can-compile
  * @author scenecs <scenecs@t-online.de>
  * @license MIT
  */
 const chai = require('chai');
-const ImportsGenerator = require('../../src/library/ImportsGenerator');
+const ImportsGenerator = require('../../../library/ImportsGenerator');
 
 chai.should();
+chai.config.includeStack = true;
 
-describe('ImportsGenerator', () => {
+describe('ImportsGenerator', function () {
     const version = '2.3.24';
 
-    describe('ImportsGenerator.getImports(version, fileExtension, importPaths)', () => {
+    describe('ImportsGenerator.getImports(version, fileExtension, importPaths)', function () {
         // tests
     });
 });
