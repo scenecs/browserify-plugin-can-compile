@@ -242,6 +242,7 @@ describe('CanCompileScriptsCache', function () {
                     return new Promise((resolve, reject) => {
                         Reflect.apply(CanCompileScriptsCache.downloadVendorScript, null, test.args)
                             .then(reject, (error) => {
+                                error.should.be.an.instanceOf(Error);
                                 error.should.match(/In-valid url/);
                                 resolve();
                             })
@@ -279,6 +280,7 @@ describe('CanCompileScriptsCache', function () {
                     return new Promise((resolve, reject) => {
                         Reflect.apply(CanCompileScriptsCache.downloadVendorScript, null, test.args)
                             .then(reject, (error) => {
+                                error.should.be.an.instanceOf(Error);
                                 error.should.match(/In-valid target file/);
                                 resolve();
                             })

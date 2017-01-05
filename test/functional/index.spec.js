@@ -26,7 +26,7 @@ describe('BrowserifyPluginCanCompile', function () {
             { cacheCanCompileScripts: true, path: undefined, version: '2.3.21' }
         )).should.be.an.instanceof(BrowserifyPluginCanCompile);
     });
-    
+
     describe('#extendBrowserifyPipeline()', function () {
         it('extend the browserify pipeline "deps" with with the duplex stream', function () {
             const instance = BrowserifyPluginCanCompile.addPlugin(
@@ -55,7 +55,7 @@ describe('BrowserifyPluginCanCompile', function () {
         });
 
         beforeEach(function () {
-            sinon.spy.reset()
+            sinon.spy.reset();
             instance = new BrowserifyPluginCanCompile(
                 browserify(),
                 { cacheCanCompileScripts: true, path: undefined, version: '2.3.21' }
@@ -63,7 +63,8 @@ describe('BrowserifyPluginCanCompile', function () {
         });
 
         it('return an empty through2 object transform-stream, if the passed file is not a template', function () {
-            (BrowserifyPluginCanCompile.transform(instance)('path/to/test.doc')._transform).should.be.deep.equal(through2.obj()._transform);
+            (BrowserifyPluginCanCompile.transform(instance)('path/to/test.doc')._transform) // eslint-disable-line no-underscore-dangle
+                .should.be.deep.equal(through2.obj()._transform); // eslint-disable-line no-underscore-dangle
         });
 
         it('return a through2 object transform-stream with the can-compile transformer', function () {
