@@ -41,7 +41,7 @@
     "mkdirp": "~0.5.1",
     "extend": "~3.0.0",
     "through2": "~2.0.1",
-    "can-compile": "~0.10.2",
+    "can-compile": "~0.11.0",
     "es6-promise": "~3.2.1",
     "follow-redirects": "~1.1.0"
   },
