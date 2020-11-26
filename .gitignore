@@ -1,11 +1,2 @@
-/*
-!/*.json
-!/.*
-!/*.md
-!/src
-!/src/*
-!/src/**/*
-!/test
-!/test/*
-!/test/**/*
 .DS*
+/node_modules
